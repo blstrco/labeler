@@ -10,6 +10,7 @@ import {BaseMatchConfig, MatchConfig} from './api/get-label-configs';
 import {checkAllChangedFiles, checkAnyChangedFiles} from './changedFiles';
 
 import {checkAnyBranch, checkAllBranch} from './branch';
+import {checkAllEvent, checkAnyEvent} from './event';
 
 type ClientType = ReturnType<typeof github.getOctokit>;
 
@@ -173,6 +174,13 @@ export function checkAny(
         return true;
       }
     }
+
+    if (matchConfig.event) {
+      if (checkAnyEvent(matchConfig.event)) {
+        core.debug(`  "any" patterns matched`);
+        return true;
+      }
+    }
   }
 
   core.debug(`  "any" patterns did not match any configs`);
@@ -216,6 +224,13 @@ export function checkAll(
 
     if (matchConfig.headBranch) {
       if (!checkAllBranch(matchConfig.headBranch, 'head')) {
+        core.debug(`  "all" patterns did not match`);
+        return false;
+      }
+    }
+
+    if (matchConfig.event) {
+      if (!checkAllEvent(matchConfig.event)) {
         core.debug(`  "all" patterns did not match`);
         return false;
       }

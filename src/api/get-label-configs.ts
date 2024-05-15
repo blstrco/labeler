@@ -10,15 +10,23 @@ import {
 } from '../changedFiles';
 
 import {toBranchMatchConfig, BranchMatchConfig} from '../branch';
+import {EventMatchConfig} from '../event';
 
 export interface MatchConfig {
   all?: BaseMatchConfig[];
   any?: BaseMatchConfig[];
 }
 
-export type BaseMatchConfig = BranchMatchConfig & ChangedFilesMatchConfig;
+export type BaseMatchConfig = BranchMatchConfig &
+  ChangedFilesMatchConfig &
+  EventMatchConfig;
 
-const ALLOWED_CONFIG_KEYS = ['changed-files', 'head-branch', 'base-branch'];
+const ALLOWED_CONFIG_KEYS = [
+  'changed-files',
+  'head-branch',
+  'base-branch',
+  'event'
+];
 
 export const getLabelConfigs = (
   client: ClientType,
