@@ -10,7 +10,7 @@ import {
 } from '../changedFiles';
 
 import {toBranchMatchConfig, BranchMatchConfig} from '../branch';
-import {EventMatchConfig} from '../event';
+import {EventMatchConfig, toEventMatchConfig} from '../event';
 
 export interface MatchConfig {
   all?: BaseMatchConfig[];
@@ -126,9 +126,11 @@ export function getLabelConfigMapFromObject(
 export function toMatchConfig(config: any): BaseMatchConfig {
   const changedFilesConfig = toChangedFilesMatchConfig(config);
   const branchConfig = toBranchMatchConfig(config);
+  const eventConfig = toEventMatchConfig(config);
 
   return {
     ...changedFilesConfig,
-    ...branchConfig
+    ...branchConfig,
+    ...eventConfig
   };
 }

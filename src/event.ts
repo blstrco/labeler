@@ -9,6 +9,16 @@ export function getEventName(): string {
   return github.context.eventName;
 }
 
+export function toEventMatchConfig(config: any): EventMatchConfig {
+  if (!config.event) {
+    return {};
+  }
+
+  return {
+    event: config.event
+  };
+}
+
 export function checkAnyEvent(regexps: string[]): boolean {
   const eventName = getEventName();
   if (!eventName) {

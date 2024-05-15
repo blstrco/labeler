@@ -236,6 +236,7 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 const get_content_1 = __nccwpck_require__(347);
 const changedFiles_1 = __nccwpck_require__(7358);
 const branch_1 = __nccwpck_require__(3824);
+const event_1 = __nccwpck_require__(4979);
 const ALLOWED_CONFIG_KEYS = [
     'changed-files',
     'head-branch',
@@ -317,7 +318,8 @@ exports.getLabelConfigMapFromObject = getLabelConfigMapFromObject;
 function toMatchConfig(config) {
     const changedFilesConfig = (0, changedFiles_1.toChangedFilesMatchConfig)(config);
     const branchConfig = (0, branch_1.toBranchMatchConfig)(config);
-    return Object.assign(Object.assign({}, changedFilesConfig), branchConfig);
+    const eventConfig = (0, event_1.toEventMatchConfig)(config);
+    return Object.assign(Object.assign(Object.assign({}, changedFilesConfig), branchConfig), eventConfig);
 }
 exports.toMatchConfig = toMatchConfig;
 
@@ -793,13 +795,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkAllEvent = exports.checkAnyEvent = exports.getEventName = void 0;
+exports.checkAllEvent = exports.checkAnyEvent = exports.toEventMatchConfig = exports.getEventName = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getEventName() {
     return github.context.eventName;
 }
 exports.getEventName = getEventName;
+function toEventMatchConfig(config) {
+    if (!config.event) {
+        return {};
+    }
+    return {
+        event: config.event
+    };
+}
+exports.toEventMatchConfig = toEventMatchConfig;
 function checkAnyEvent(regexps) {
     const eventName = getEventName();
     if (!eventName) {
