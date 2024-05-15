@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: labeler
+  description: GitHub Action for labelling pull requests based on attributes
+  annotations:
+    github.com/project-slug: https://github.com/blstrco/labeler
+    backstage.io/techdocs-ref: dir:.
+    linktr.ee/criticality: Low
+    linktr.ee/deployable: No
+    linktr.ee/personal-data: No
+    linktr.ee/visibility: Internal
+spec:
+  type: Component
+  system: ci-cd
+  lifecycle: production
+  owner: developer-platform
