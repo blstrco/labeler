@@ -5,8 +5,10 @@ export type EventMatchConfig = {
   event?: string[];
 };
 
-export function getEventName(): string {
-  return github.context.eventName;
+export function getEventDetail(): {action?: string; event: string} {
+  const action = github.context.payload.action;
+  const event = github.context.eventName;
+  return {action, event};
 }
 
 export function toEventMatchConfig(config: any): EventMatchConfig {
@@ -20,11 +22,13 @@ export function toEventMatchConfig(config: any): EventMatchConfig {
 }
 
 export function checkAnyEvent(regexps: string[]): boolean {
-  const eventName = getEventName();
-  if (!eventName) {
+  const {action, event} = getEventDetail();
+  if (!event) {
     core.debug(`   no event name`);
     return false;
   }
+
+  const eventName = action ? `${event}.${action}` : event;
 
   core.debug(`   checking "event" pattern against ${eventName}`);
   const matchers = regexps.map(regexp => new RegExp(regexp));
@@ -43,11 +47,13 @@ export function checkAnyEvent(regexps: string[]): boolean {
 }
 
 export function checkAllEvent(regexps: string[]): boolean {
-  const eventName = getEventName();
-  if (!eventName) {
+  const {action, event} = getEventDetail();
+  if (!event) {
     core.debug(`   no event name`);
     return false;
   }
+
+  const eventName = action ? `${event}.${action}` : event;
 
   core.debug(`   checking "event" pattern against ${eventName}`);
   const matchers = regexps.map(regexp => new RegExp(regexp));

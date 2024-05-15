@@ -795,13 +795,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkAllEvent = exports.checkAnyEvent = exports.toEventMatchConfig = exports.getEventName = void 0;
+exports.checkAllEvent = exports.checkAnyEvent = exports.toEventMatchConfig = exports.getEventDetail = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-function getEventName() {
-    return github.context.eventName;
+function getEventDetail() {
+    const action = github.context.payload.action;
+    const event = github.context.eventName;
+    return { action, event };
 }
-exports.getEventName = getEventName;
+exports.getEventDetail = getEventDetail;
 function toEventMatchConfig(config) {
     if (!config.event) {
         return {};
@@ -812,11 +814,12 @@ function toEventMatchConfig(config) {
 }
 exports.toEventMatchConfig = toEventMatchConfig;
 function checkAnyEvent(regexps) {
-    const eventName = getEventName();
-    if (!eventName) {
+    const { action, event } = getEventDetail();
+    if (!event) {
         core.debug(`   no event name`);
         return false;
     }
+    const eventName = action ? `${event}.${action}` : event;
     core.debug(`   checking "event" pattern against ${eventName}`);
     const matchers = regexps.map(regexp => new RegExp(regexp));
     for (const matcher of matchers) {
@@ -832,11 +835,12 @@ function checkAnyEvent(regexps) {
 }
 exports.checkAnyEvent = checkAnyEvent;
 function checkAllEvent(regexps) {
-    const eventName = getEventName();
-    if (!eventName) {
+    const { action, event } = getEventDetail();
+    if (!event) {
         core.debug(`   no event name`);
         return false;
     }
+    const eventName = action ? `${event}.${action}` : event;
     core.debug(`   checking "event" pattern against ${eventName}`);
     const matchers = regexps.map(regexp => new RegExp(regexp));
     for (const matcher of matchers) {
