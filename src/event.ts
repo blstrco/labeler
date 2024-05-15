@@ -57,7 +57,7 @@ export function checkAllEvent(regexps: string[]): boolean {
 function matchEventPattern(matcher: RegExp, eventName: string): boolean {
   core.debug(`    - ${matcher}`);
   if (matcher.test(eventName)) {
-    core.debug(`    "branch" pattern matched`);
+    core.debug(`    "event" pattern matched`);
     return true;
   }
 
