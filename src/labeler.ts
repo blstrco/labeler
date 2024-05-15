@@ -11,6 +11,7 @@ import {checkAllChangedFiles, checkAnyChangedFiles} from './changedFiles';
 
 import {checkAnyBranch, checkAllBranch} from './branch';
 import {checkAllEvent, checkAnyEvent} from './event';
+import {shouldSkipLabel} from './notLabels';
 
 type ClientType = ReturnType<typeof github.getOctokit>;
 
@@ -45,7 +46,9 @@ async function labeler() {
 
     for (const [label, configs] of labelConfigs.entries()) {
       core.debug(`processing ${label}`);
-      if (checkMatchConfigs(pullRequest.changedFiles, configs, dot)) {
+      if (
+        checkMatchConfigs(pullRequest.changedFiles, allLabels, configs, dot)
+      ) {
         allLabels.add(label);
       } else if (syncLabels) {
         allLabels.delete(label);
@@ -100,12 +103,13 @@ async function labeler() {
 
 export function checkMatchConfigs(
   changedFiles: string[],
+  allLabels: Set<string>,
   matchConfigs: MatchConfig[],
   dot: boolean
 ): boolean {
   for (const config of matchConfigs) {
     core.debug(` checking config ${JSON.stringify(config)}`);
-    if (!checkMatch(changedFiles, config, dot)) {
+    if (!checkMatch(changedFiles, allLabels, config, dot)) {
       return false;
     }
   }
@@ -115,6 +119,7 @@ export function checkMatchConfigs(
 
 function checkMatch(
   changedFiles: string[],
+  allLabels: Set<string>,
   matchConfig: MatchConfig,
   dot: boolean
 ): boolean {
@@ -124,13 +129,13 @@ function checkMatch(
   }
 
   if (matchConfig.all) {
-    if (!checkAll(matchConfig.all, changedFiles, dot)) {
+    if (!checkAll(matchConfig.all, changedFiles, allLabels, dot)) {
       return false;
     }
   }
 
   if (matchConfig.any) {
-    if (!checkAny(matchConfig.any, changedFiles, dot)) {
+    if (!checkAny(matchConfig.any, changedFiles, allLabels, dot)) {
       return false;
     }
   }
@@ -142,6 +147,7 @@ function checkMatch(
 export function checkAny(
   matchConfigs: BaseMatchConfig[],
   changedFiles: string[],
+  allLabels: Set<string>,
   dot: boolean
 ): boolean {
   core.debug(`  checking "any" patterns`);
@@ -181,6 +187,13 @@ export function checkAny(
         return true;
       }
     }
+
+    if (matchConfig['not-labels']) {
+      if (shouldSkipLabel(matchConfig, [...allLabels])) {
+        core.debug(`  "not-labels" patterns matched`);
+        return false;
+      }
+    }
   }
 
   core.debug(`  "any" patterns did not match any configs`);
@@ -191,6 +204,7 @@ export function checkAny(
 export function checkAll(
   matchConfigs: BaseMatchConfig[],
   changedFiles: string[],
+  allLabels: Set<string>,
   dot: boolean
 ): boolean {
   core.debug(`  checking "all" patterns`);
@@ -232,6 +246,13 @@ export function checkAll(
     if (matchConfig.event) {
       if (!checkAllEvent(matchConfig.event)) {
         core.debug(`  "all" patterns did not match`);
+        return false;
+      }
+    }
+
+    if (matchConfig['not-labels']) {
+      if (shouldSkipLabel(matchConfig, [...allLabels])) {
+        core.debug(`  "not-labels" patterns matched`);
         return false;
       }
     }

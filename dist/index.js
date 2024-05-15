@@ -237,11 +237,13 @@ const get_content_1 = __nccwpck_require__(347);
 const changedFiles_1 = __nccwpck_require__(7358);
 const branch_1 = __nccwpck_require__(3824);
 const event_1 = __nccwpck_require__(4979);
+const notLabels_1 = __nccwpck_require__(2288);
 const ALLOWED_CONFIG_KEYS = [
     'changed-files',
     'head-branch',
     'base-branch',
-    'event'
+    'event',
+    'not-labels'
 ];
 const getLabelConfigs = (client, configurationPath) => Promise.resolve()
     .then(() => {
@@ -319,7 +321,8 @@ function toMatchConfig(config) {
     const changedFilesConfig = (0, changedFiles_1.toChangedFilesMatchConfig)(config);
     const branchConfig = (0, branch_1.toBranchMatchConfig)(config);
     const eventConfig = (0, event_1.toEventMatchConfig)(config);
-    return Object.assign(Object.assign(Object.assign({}, changedFilesConfig), branchConfig), eventConfig);
+    const notLabelsConfig = (0, notLabels_1.toNotLabelsMatchConfig)(config);
+    return Object.assign(Object.assign(Object.assign(Object.assign({}, changedFilesConfig), branchConfig), eventConfig), notLabelsConfig);
 }
 exports.toMatchConfig = toMatchConfig;
 
@@ -1049,6 +1052,7 @@ const get_inputs_1 = __nccwpck_require__(4288);
 const changedFiles_1 = __nccwpck_require__(7358);
 const branch_1 = __nccwpck_require__(3824);
 const event_1 = __nccwpck_require__(4979);
+const notLabels_1 = __nccwpck_require__(2288);
 // GitHub Issues cannot have more than 100 labels
 const GITHUB_MAX_LABELS = 100;
 const run = () => labeler().catch(error => {
@@ -1076,7 +1080,7 @@ function labeler() {
                 const allLabels = new Set(preexistingLabels);
                 for (const [label, configs] of labelConfigs.entries()) {
                     core.debug(`processing ${label}`);
-                    if (checkMatchConfigs(pullRequest.changedFiles, configs, dot)) {
+                    if (checkMatchConfigs(pullRequest.changedFiles, allLabels, configs, dot)) {
                         allLabels.add(label);
                     }
                     else if (syncLabels) {
@@ -1119,35 +1123,35 @@ function labeler() {
         }
     });
 }
-function checkMatchConfigs(changedFiles, matchConfigs, dot) {
+function checkMatchConfigs(changedFiles, allLabels, matchConfigs, dot) {
     for (const config of matchConfigs) {
         core.debug(` checking config ${JSON.stringify(config)}`);
-        if (!checkMatch(changedFiles, config, dot)) {
+        if (!checkMatch(changedFiles, allLabels, config, dot)) {
             return false;
         }
     }
     return true;
 }
 exports.checkMatchConfigs = checkMatchConfigs;
-function checkMatch(changedFiles, matchConfig, dot) {
+function checkMatch(changedFiles, allLabels, matchConfig, dot) {
     if (!Object.keys(matchConfig).length) {
         core.debug(`  no "any" or "all" patterns to check`);
         return false;
     }
     if (matchConfig.all) {
-        if (!checkAll(matchConfig.all, changedFiles, dot)) {
+        if (!checkAll(matchConfig.all, changedFiles, allLabels, dot)) {
             return false;
         }
     }
     if (matchConfig.any) {
-        if (!checkAny(matchConfig.any, changedFiles, dot)) {
+        if (!checkAny(matchConfig.any, changedFiles, allLabels, dot)) {
             return false;
         }
     }
     return true;
 }
 // equivalent to "Array.some()" but expanded for debugging and clarity
-function checkAny(matchConfigs, changedFiles, dot) {
+function checkAny(matchConfigs, changedFiles, allLabels, dot) {
     core.debug(`  checking "any" patterns`);
     if (!matchConfigs.length ||
         !matchConfigs.some(configOption => Object.keys(configOption).length)) {
@@ -1179,13 +1183,19 @@ function checkAny(matchConfigs, changedFiles, dot) {
                 return true;
             }
         }
+        if (matchConfig['not-labels']) {
+            if ((0, notLabels_1.shouldSkipLabel)(matchConfig, [...allLabels])) {
+                core.debug(`  "not-labels" patterns matched`);
+                return false;
+            }
+        }
     }
     core.debug(`  "any" patterns did not match any configs`);
     return false;
 }
 exports.checkAny = checkAny;
 // equivalent to "Array.every()" but expanded for debugging and clarity
-function checkAll(matchConfigs, changedFiles, dot) {
+function checkAll(matchConfigs, changedFiles, allLabels, dot) {
     core.debug(`  checking "all" patterns`);
     if (!matchConfigs.length ||
         !matchConfigs.some(configOption => Object.keys(configOption).length)) {
@@ -1221,11 +1231,45 @@ function checkAll(matchConfigs, changedFiles, dot) {
                 return false;
             }
         }
+        if (matchConfig['not-labels']) {
+            if ((0, notLabels_1.shouldSkipLabel)(matchConfig, [...allLabels])) {
+                core.debug(`  "not-labels" patterns matched`);
+                return false;
+            }
+        }
     }
     core.debug(`  "all" patterns matched all configs`);
     return true;
 }
 exports.checkAll = checkAll;
+
+
+/***/ }),
+
+/***/ 2288:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.shouldSkipLabel = exports.toNotLabelsMatchConfig = void 0;
+function toNotLabelsMatchConfig(config) {
+    if (!config['not-labels']) {
+        return {};
+    }
+    return {
+        ['not-labels']: config['not-labels']
+    };
+}
+exports.toNotLabelsMatchConfig = toNotLabelsMatchConfig;
+/**
+ * Check whether the `not-labels` defined in the configuration file completely match the existing labels on the PR, returning `true` if they do, `false` otherwise.
+ */
+function shouldSkipLabel(config, existingLabels) {
+    var _a;
+    return ((_a = existingLabels.every(label => { var _a; return (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.includes(label); })) !== null && _a !== void 0 ? _a : false);
+}
+exports.shouldSkipLabel = shouldSkipLabel;
 
 
 /***/ }),

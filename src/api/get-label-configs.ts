@@ -11,6 +11,7 @@ import {
 
 import {toBranchMatchConfig, BranchMatchConfig} from '../branch';
 import {EventMatchConfig, toEventMatchConfig} from '../event';
+import {NotLabelsMatchConfig, toNotLabelsMatchConfig} from '../notLabels';
 
 export interface MatchConfig {
   all?: BaseMatchConfig[];
@@ -19,13 +20,15 @@ export interface MatchConfig {
 
 export type BaseMatchConfig = BranchMatchConfig &
   ChangedFilesMatchConfig &
-  EventMatchConfig;
+  EventMatchConfig &
+  NotLabelsMatchConfig;
 
 const ALLOWED_CONFIG_KEYS = [
   'changed-files',
   'head-branch',
   'base-branch',
-  'event'
+  'event',
+  'not-labels'
 ];
 
 export const getLabelConfigs = (
@@ -127,10 +130,12 @@ export function toMatchConfig(config: any): BaseMatchConfig {
   const changedFilesConfig = toChangedFilesMatchConfig(config);
   const branchConfig = toBranchMatchConfig(config);
   const eventConfig = toEventMatchConfig(config);
+  const notLabelsConfig = toNotLabelsMatchConfig(config);
 
   return {
     ...changedFilesConfig,
     ...branchConfig,
-    ...eventConfig
+    ...eventConfig,
+    ...notLabelsConfig
   };
 }
