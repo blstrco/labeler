@@ -1267,7 +1267,7 @@ exports.toNotLabelsMatchConfig = toNotLabelsMatchConfig;
  */
 function checkAnyNotLabel(config, existingLabels) {
     var _a, _b;
-    // Return true if all the labels in the `not-labels` array are present in the existing labels
+    // Return true if any the labels in the `not-labels` array are present in the existing labels
     return ((_b = (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.some(label => existingLabels.includes(label))) !== null && _b !== void 0 ? _b : false);
 }
 exports.checkAnyNotLabel = checkAnyNotLabel;

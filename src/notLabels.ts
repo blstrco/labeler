@@ -19,7 +19,7 @@ export function checkAnyNotLabel(
   config: NotLabelsMatchConfig,
   existingLabels: string[]
 ): boolean {
-  // Return true if all the labels in the `not-labels` array are present in the existing labels
+  // Return true if any the labels in the `not-labels` array are present in the existing labels
   return (
     config['not-labels']?.some(label => existingLabels.includes(label)) ??
     false
