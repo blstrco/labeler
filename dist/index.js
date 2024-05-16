@@ -1184,7 +1184,7 @@ function checkAny(matchConfigs, changedFiles, allLabels, dot) {
             }
         }
         if (matchConfig['not-labels']) {
-            if ((0, notLabels_1.shouldSkipLabel)(matchConfig, [...allLabels])) {
+            if ((0, notLabels_1.checkAnyNotLabel)(matchConfig, [...allLabels])) {
                 core.debug(`  "not-labels" patterns matched`);
                 return false;
             }
@@ -1232,7 +1232,7 @@ function checkAll(matchConfigs, changedFiles, allLabels, dot) {
             }
         }
         if (matchConfig['not-labels']) {
-            if ((0, notLabels_1.shouldSkipLabel)(matchConfig, [...allLabels])) {
+            if ((0, notLabels_1.checkAllNotLabel)(matchConfig, [...allLabels])) {
                 core.debug(`  "not-labels" patterns matched`);
                 return false;
             }
@@ -1252,7 +1252,7 @@ exports.checkAll = checkAll;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.shouldSkipLabel = exports.toNotLabelsMatchConfig = void 0;
+exports.checkAllNotLabel = exports.checkAnyNotLabel = exports.toNotLabelsMatchConfig = void 0;
 function toNotLabelsMatchConfig(config) {
     if (!config['not-labels']) {
         return {};
@@ -1263,14 +1263,23 @@ function toNotLabelsMatchConfig(config) {
 }
 exports.toNotLabelsMatchConfig = toNotLabelsMatchConfig;
 /**
+ * Check whether the `not-labels` defined in the configuration file contain a match in the existing labels on the PR, returning `true` if they do, `false` otherwise.
+ */
+function checkAnyNotLabel(config, existingLabels) {
+    var _a, _b;
+    // Return true if any the labels in the `not-labels` array are present in the existing labels
+    return ((_b = (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.some(label => existingLabels.includes(label))) !== null && _b !== void 0 ? _b : false);
+}
+exports.checkAnyNotLabel = checkAnyNotLabel;
+/**
  * Check whether the `not-labels` defined in the configuration file completely match the existing labels on the PR, returning `true` if they do, `false` otherwise.
  */
-function shouldSkipLabel(config, existingLabels) {
+function checkAllNotLabel(config, existingLabels) {
     var _a, _b;
     // Return true if all the labels in the `not-labels` array are present in the existing labels
     return ((_b = (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.every(label => existingLabels.includes(label))) !== null && _b !== void 0 ? _b : false);
 }
-exports.shouldSkipLabel = shouldSkipLabel;
+exports.checkAllNotLabel = checkAllNotLabel;
 
 
 /***/ }),

@@ -13,9 +13,23 @@ export function toNotLabelsMatchConfig(config: any): NotLabelsMatchConfig {
 }
 
 /**
+ * Check whether the `not-labels` defined in the configuration file contain a match in the existing labels on the PR, returning `true` if they do, `false` otherwise.
+ */
+export function checkAnyNotLabel(
+  config: NotLabelsMatchConfig,
+  existingLabels: string[]
+): boolean {
+  // Return true if any the labels in the `not-labels` array are present in the existing labels
+  return (
+    config['not-labels']?.some(label => existingLabels.includes(label)) ??
+    false
+  );
+}
+
+/**
  * Check whether the `not-labels` defined in the configuration file completely match the existing labels on the PR, returning `true` if they do, `false` otherwise.
  */
-export function shouldSkipLabel(
+export function checkAllNotLabel(
   config: NotLabelsMatchConfig,
   existingLabels: string[]
 ): boolean {
