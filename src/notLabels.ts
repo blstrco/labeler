@@ -19,8 +19,9 @@ export function shouldSkipLabel(
   config: NotLabelsMatchConfig,
   existingLabels: string[]
 ): boolean {
+  // Return true if all the labels in the `not-labels` array are present in the existing labels
   return (
-    existingLabels.every(label => config['not-labels']?.includes(label)) ??
+    config['not-labels']?.every(label => existingLabels.includes(label)) ??
     false
   );
 }

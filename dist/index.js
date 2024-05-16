@@ -1266,8 +1266,9 @@ exports.toNotLabelsMatchConfig = toNotLabelsMatchConfig;
  * Check whether the `not-labels` defined in the configuration file completely match the existing labels on the PR, returning `true` if they do, `false` otherwise.
  */
 function shouldSkipLabel(config, existingLabels) {
-    var _a;
-    return ((_a = existingLabels.every(label => { var _a; return (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.includes(label); })) !== null && _a !== void 0 ? _a : false);
+    var _a, _b;
+    // Return true if all the labels in the `not-labels` array are present in the existing labels
+    return ((_b = (_a = config['not-labels']) === null || _a === void 0 ? void 0 : _a.every(label => existingLabels.includes(label))) !== null && _b !== void 0 ? _b : false);
 }
 exports.shouldSkipLabel = shouldSkipLabel;
 
