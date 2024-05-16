@@ -11,7 +11,7 @@ import {checkAllChangedFiles, checkAnyChangedFiles} from './changedFiles';
 
 import {checkAnyBranch, checkAllBranch} from './branch';
 import {checkAllEvent, checkAnyEvent} from './event';
-import {shouldSkipLabel} from './notLabels';
+import {checkAllNotLabel, checkAnyNotLabel} from './notLabels';
 
 type ClientType = ReturnType<typeof github.getOctokit>;
 
@@ -189,7 +189,7 @@ export function checkAny(
     }
 
     if (matchConfig['not-labels']) {
-      if (shouldSkipLabel(matchConfig, [...allLabels])) {
+      if (checkAnyNotLabel(matchConfig, [...allLabels])) {
         core.debug(`  "not-labels" patterns matched`);
         return false;
       }
@@ -251,7 +251,7 @@ export function checkAll(
     }
 
     if (matchConfig['not-labels']) {
-      if (shouldSkipLabel(matchConfig, [...allLabels])) {
+      if (checkAllNotLabel(matchConfig, [...allLabels])) {
         core.debug(`  "not-labels" patterns matched`);
         return false;
       }
